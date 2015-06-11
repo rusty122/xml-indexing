@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<batch xmlns="http://www.quertle.com/schema/UFT"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.quertle.com/schema/UFT uft.xsd"
+       xsi:noNamespaceSchemaLocation="http://www.quertle.com/schema/UFT"
+       schemaVersion="1.1">
+
+    <doc>
+        <doc-set-meta>
+            <publisher>JOMI</publisher>
+            <name>JOMI</name>
+        </doc-set-meta>
+
+        <doc-meta>
+            <doc-ids>
+                <doc-id type="pii">JOMI-8</doc-id>
+            </doc-ids>
+
+            <date-published>
+                <year>2014</year>
+                <month>07</month>
+                <day>31</day>
+            </date-published>
+
+            <authors>
+                <author>
+                    <last-name>Reinhorn</last-name>
+                    <fore-name>Michael</fore-name>
+                    <first-name>Michael</first-name>
+                    <initials>M</initials>
+	<affiliation>Tufts University School of Medicine</affiliation>
+                </author>
+            </authors>
+
+            <title>${x}</title>
+
+            <abstract>
+                <section>
+                    <text>WHATEVER PASSES AS AN ABSTRACT GOES HERE. THIS IS WHAT WOULD BE SHOWN TO THE USER WHEN THEY CLICK "SHOW ABSTRACT". FOR EXAMPLE: Inguinal hernia is the most common form of hernia in adults, and is the result of either a congenital or acquired weakness in the lower abdominal wall, resulting in a defect through which the lining of the abdomen, or peritoneum, protrudes. An indirect inguinal hernia results from dilation of the internal ring over time, or a congenital patent processus vaginalis. In either case, a peritoneal sac herniates through the internal ring and often the external ring as well. In a direct inguinal hernia, transversalis fascia stretches out allowing for preperitoneal fat or peritoneal contents to herniate through Hasselbach’s triangle. This can result in swelling of the lower abdomen and, at times, pain. In severe cases, abdominal contents such as bowel can protrude through the weakness as well, creating a life-threatening condition. The aim of inguinal hernia surgery is to repair the structural integrity of the lower abdomen, and, in adults, placement of a mesh reduces the risk of reformation, or recurrence, of the hernia. The difficult recovery associated with traditional inguinal hernia repair, where the inguinal canal is opened, has driven interest in less invasive alternatives, such as laparoscopic and open preperitoneal approaches. In experienced hands, these latter approaches result in equivalent rates of recurrence with much improved postoperative recovery. </text>
+                </section>
+            </abstract>
+        </doc-meta>
+
+        <content>
+            <body>
+                <section>
+                    <title>OPTIONAL SECTION TITLE (THIS COULD BE THE TITLE OF EACH SECTION)</title>
+                    <text>THE TEXT THAT SHOULD BE SEARCHABLE.  THIS WOULD BE THE TEXT IN EACH INFORMATIVE SECTION  (THAT IS, DON'T INCLUDE ANY DISCLOSURES, STATEMENTS OF CONSENT, CITATIONS, OR COMMENTS/RESPONSES. INCLUDE THE PROCEDURE OUTLINE TEXT.</text>
+                </section>
+                <section>
+                    <title>Focused history</title>
+                    <text>History of inguinal hernia is usually consistent with a lower abdominal mass, which may or may not change in size. Most patients feel some discomfort or pain with lifting, sitting or exercise. Symptoms are often worse at the end of the day. Some patients may remain symptom free for years. If there are complaints of pain without any history of a mass, causes other than inguinal hernia should be sought. Patients who present with a history of a severe pain, associated with an inflamed lower abdominal mass should be evaluated emergently for incarceration of abdominal contents within a hernia.</text>
+                </section>
+                <section>
+                    <title>MORE INFORMATION</title>
+                    <text>ALTHOUGH QUETZAL SUPPORTS MULTIPLE SECTIONS, IT REALLY DOESN'T MAKE ANY DIFFERENCE IF YOU BREAK OUT THE TEXT INTO SECTIONS OR INCLUDE ALL THE TEXT IN ONE LONG SECTION.  IF YOU DO PUT ALL THE TEXT INTO ONE SECTION, BE SURE TO END EACH HEADING WITH A PERIOD, SO THAT TWO SENTENCES DO NOT RUN TOGETHER.</text>
+                </section>
+                <section>
+                    <title>MORE INFORMATION</title>
+                    <text>ONE FILE MAY CONTAIN MORE THAN ONE DOCUMENT (EACH IN A <doc></doc>). HOWEVER, IT IS EASIER TO HAVE ONE DOCUMENT PER FILE IN CASE CORRECTIONS EVER NEED TO BE MADE.</text>
+                </section>
+             </body>
+        </content>
+
+        <extra>
+            <ext-links>
+                <ext-link type="url" view-type="html">https://jomi.com/article/8/</ext-link>
+            </ext-links>
+        </extra>
+    </doc>
+
+</batch>
