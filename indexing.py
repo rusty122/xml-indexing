@@ -7,34 +7,37 @@ except ImportError:
 
 
 
-
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
 # For each article in the xml file
 for elem in tree.iterfind('channel/item'):
+	# declare empty dictionary that will be appended to hold all of the data we are parsing
+	data = {}
 	# Grab title of article
-	title = elem.find('title').text
-	link = elem.find('link').text
+	data['title'] = elem.find('title').text
+	data['link'] = elem.find('link').text
 	# find every element with wp:postmeta
-	items = elem.findall("{http://wordpress.org/export/1.2/}postmeta")
-	for i in items:
+	# turn this following section into a function that takes a dictionary, appends it, and retuns it
+	for i in elem.findall("{http://wordpress.org/export/1.2/}postmeta"):
 		if i.find('{http://wordpress.org/export/1.2/}meta_key').text == "production_id":
-		 	production_id = i.find('{http://wordpress.org/export/1.2/}meta_value').text
+		 	data['production_id'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
 		elif i.find('{http://wordpress.org/export/1.2/}meta_key').text == "hospital_name":
-			affiliation = i.find('{http://wordpress.org/export/1.2/}meta_value').text
+			data['affiliation'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
 
-	# get date of publishing (will have to parse this later into separate values)
-	pubdate = elem.find('pubDate').text
+	# get date of publishing (will have to parse this into m-d-y values)
+	data['pubdate'] = elem.find('pubDate').text
 	# get the author's JoMI username (findall if multiple auhors?)
 	author_username = elem.find('category[@domain="author"]').text
 
 	for i in tree.iterfind('channel/{http://wordpress.org/export/1.2/}author'):
 		if i.find('{http://wordpress.org/export/1.2/}author_login').text == author_username:
-			 doctor = i.find('{http://wordpress.org/export/1.2/}author_display_name').text
+			 data['author'] = i.find('{http://wordpress.org/export/1.2/}author_display_name').text
 	# for tag in content:
 	# 	print tag
+
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
-	template = env.get_template('mytemplate.html')
+	# template = env.get_template('mytemplate.html')
+	# check documentation for this part
 	TEMPLATE_FILE = "/home/russell/Desktop/indexing/JOMI-8.xml"
 	template = templateEnv.get_template( TEMPLATE_FILE )
 	templateVars = { "title" : "Test Example",
@@ -45,9 +48,9 @@ for elem in tree.iterfind('channel/item'):
 	file_.close()
 
 
-#gather all of the data data
-#import into mako?
-#save file with specific name in specific folder
+# parse the necessary data into a dictionary
+# render an xml file with the dictionary as the argument
+# save file with unique name in specific folder
 
 
 
