@@ -10,27 +10,35 @@ except ImportError:
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
 # For each article in the xml file
 for elem in tree.iterfind('channel/item'):
-	# declare empty dictionary that will be appended to hold all of the data we are parsing
+	# Initialize an empty dictionary that will be appended
+	# to hold all of the data that we parse
 	data = {}
-	# Grab title of article
+	# Save the title and link of the article as dictionary entries
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
-	# find every element with wp:postmeta
-	# turn this following section into a function that takes a dictionary, appends it, and retuns it
+	# loop through every element in the article with the tag wp:postmeta
 	for i in elem.findall("{http://wordpress.org/export/1.2/}postmeta"):
+		# If the text in the meta_key tag is "production_id" 
+		# save the meta_value tag text in our dictionary as "production_id"
 		if i.find('{http://wordpress.org/export/1.2/}meta_key').text == "production_id":
 		 	data['production_id'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
+		 i in elem.findall("{http://wordpress.org/export/1.2/}postmeta"):
+		# Otherwise, if the text in the meta_key tag is "hospital_name"
+		# save the text of meta_value tag in our dictionary as "affiliation"
 		elif i.find('{http://wordpress.org/export/1.2/}meta_key').text == "hospital_name":
 			data['affiliation'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
 
-	# get date of publishing (will have to parse this into m-d-y values)
+	# Save date of publishing as dictionary entry "pubdate"
+	# (will have to parse this into m-d-y values)
 	data['pubdate'] = elem.find('pubDate').text
-	# get the author's JoMI username (findall if multiple auhors?)
+	# get the author's JoMI username (use findall() if multiple authors exist?)
 	author_username = elem.find('category[@domain="author"]').text
-
+	# loop through author listings at beginning of xml doc
 	for i in tree.iterfind('channel/{http://wordpress.org/export/1.2/}author'):
 		if i.find('{http://wordpress.org/export/1.2/}author_login').text == author_username:
 			 data['author'] = i.find('{http://wordpress.org/export/1.2/}author_display_name').text
+
+	# content = elem.find('{http://purl.org/rss/1.0/modules/content/}encoded').text
 	# for tag in content:
 	# 	print tag
 
@@ -58,7 +66,6 @@ for elem in tree.iterfind('channel/item'):
 
 # Notes: 
 # The text for both the Main Text and the Procedure Outline would be appropriate.
-# print elem.find('{http://purl.org/rss/1.0/modules/content/}encoded').text
 # Do not include the citations, comments, disclosures, or statement of consent.
 # Each document will need a unique identifier.  In the example, I used
 	# “JOMI-“ along with your identifier.  Adding “JOMI-“ before your
