@@ -5,8 +5,12 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+# Define namespaces dictionary so that we can use them in ET.find()
+# or ET.findall() functions
+namespace = {'wp':'http://wordpress.org/export/1.2/'
+			 'content':'http://purl.org/rss/1.0/modules/content/'}
 
-
+# Use ET to define the xml file
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
 # For each article in the xml file
 for elem in tree.iterfind('channel/item'):
@@ -17,16 +21,16 @@ for elem in tree.iterfind('channel/item'):
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
 	# loop through every element in the article with the tag wp:postmeta
-	for i in elem.findall("{http://wordpress.org/export/1.2/}postmeta"):
+	for i in elem.findall("{wp:postmeta", namespace):
 		# If the text in the meta_key tag is "production_id" 
 		# save the meta_value tag text in our dictionary as "production_id"
-		if i.find('{http://wordpress.org/export/1.2/}meta_key').text == "production_id":
-		 	data['production_id'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
-		 i in elem.findall("{http://wordpress.org/export/1.2/}postmeta"):
+		if i.find('wp:meta_key', namespace).text == "production_id":
+		 	data['production_id'] = i.find('wp:meta_value', namespace).text
+		 i in elem.findall("wp:postmeta", namespace):
 		# Otherwise, if the text in the meta_key tag is "hospital_name"
 		# save the text of meta_value tag in our dictionary as "affiliation"
-		elif i.find('{http://wordpress.org/export/1.2/}meta_key').text == "hospital_name":
-			data['affiliation'] = i.find('{http://wordpress.org/export/1.2/}meta_value').text
+		elif i.find('wp:meta_key', namespace).text == "hospital_name":
+			data['affiliation'] = i.find('wp:meta_value', namespace).text
 
 	# Save date of publishing as dictionary entry "pubdate"
 	# (will have to parse this into m-d-y values)
@@ -34,11 +38,11 @@ for elem in tree.iterfind('channel/item'):
 	# get the author's JoMI username (use findall() if multiple authors exist?)
 	author_username = elem.find('category[@domain="author"]').text
 	# loop through author listings at beginning of xml doc
-	for i in tree.iterfind('channel/{http://wordpress.org/export/1.2/}author'):
-		if i.find('{http://wordpress.org/export/1.2/}author_login').text == author_username:
-			 data['author'] = i.find('{http://wordpress.org/export/1.2/}author_display_name').text
+	for i in tree.iterfind('channel/wp:author', namespace):
+		if i.find('wp:author_login', namespace).text == author_username:
+			 data['author'] = i.find('wp:author_display_name', namespace).text
 
-	# content = elem.find('{http://purl.org/rss/1.0/modules/content/}encoded').text
+	# content = elem.find('content:encoded', namespace).text
 	# for tag in content:
 	# 	print tag
 
@@ -57,6 +61,16 @@ for elem in tree.iterfind('channel/item'):
 
 
 # parse the necessary data into a dictionary
+	# tough part of this is the actual content
+	# thinking about actually switching over to pulling data straight from MySQL
+	# the xml file that WordPress generates contains an entire xml doc of formatted
+		# text in the contents section
+	# Would need to find a way to generate bullet points or numbered lists for 
+		# <ul> and <ol> respectively
+	# Here's a possible solution I see: filter through the content to get rid 
+		# of unwanted sections
+	# Feed this data into an xml to plain-text converter
+	# Still need to make arrays of titles and corresponding text to feed into the template engine
 # render an xml file with the dictionary as the argument
 # save file with unique name in specific folder
 
