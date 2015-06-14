@@ -1,17 +1,19 @@
-import os
-from jinja2 import Template
+# -*- coding: utf-8 -*-
+import sys
+import jinja2
+import codecs
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
-# Define namespaces dictionary so that we can use them in ET.find()
-# or ET.findall() functions
-namespace = {'wp':'http://wordpress.org/export/1.2/'
+# Define namespaces dictionary to make ET.find() or ET.findall() more simple
+namespace = {'wp':'http://wordpress.org/export/1.2/',
 			 'content':'http://purl.org/rss/1.0/modules/content/'}
 
 # Use ET to define the xml file
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
+
 # For each article in the xml file
 for elem in tree.iterfind('channel/item'):
 	# Initialize an empty dictionary that will be appended
@@ -21,17 +23,15 @@ for elem in tree.iterfind('channel/item'):
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
 	# loop through every element in the article with the tag wp:postmeta
-	for i in elem.findall("{wp:postmeta", namespace):
+	for i in elem.findall('wp:postmeta', namespace):
 		# If the text in the meta_key tag is "production_id" 
 		# save the meta_value tag text in our dictionary as "production_id"
 		if i.find('wp:meta_key', namespace).text == "production_id":
-		 	data['production_id'] = i.find('wp:meta_value', namespace).text
-		 i in elem.findall("wp:postmeta", namespace):
+			data['production_id'] = i.find('wp:meta_value', namespace).text
 		# Otherwise, if the text in the meta_key tag is "hospital_name"
 		# save the text of meta_value tag in our dictionary as "affiliation"
 		elif i.find('wp:meta_key', namespace).text == "hospital_name":
 			data['affiliation'] = i.find('wp:meta_value', namespace).text
-
 	# Save date of publishing as dictionary entry "pubdate"
 	# (will have to parse this into m-d-y values)
 	data['pubdate'] = elem.find('pubDate').text
@@ -46,18 +46,15 @@ for elem in tree.iterfind('channel/item'):
 	# for tag in content:
 	# 	print tag
 
+
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
-	# template = env.get_template('mytemplate.html')
-	# check documentation for this part
 	TEMPLATE_FILE = "/home/russell/Desktop/indexing/JOMI-8.xml"
 	template = templateEnv.get_template( TEMPLATE_FILE )
-	templateVars = { "title" : "Test Example",
-                	 "description" : "A simple inquiry of function." }
 	# needs to have separate name for each article
-	file_ = open('article.xml', 'w')
-	file_.write( template.render( templateVars ) )
-	file_.close()
+	file = codecs.open('files/article.xml', 'w', encoding='utf8')
+	file.write( template.render( data ) )
+	file.close()
 
 
 # parse the necessary data into a dictionary
@@ -73,9 +70,6 @@ for elem in tree.iterfind('channel/item'):
 	# Still need to make arrays of titles and corresponding text to feed into the template engine
 # render an xml file with the dictionary as the argument
 # save file with unique name in specific folder
-
-
-
 
 
 # Notes: 

@@ -7,32 +7,32 @@
 
     <doc>
         <doc-set-meta>
-            <publisher>JOMI</publisher>
-            <name>JOMI</name>
+            <publisher>JoMI</publisher>
+            <name>JoMI</name>
         </doc-set-meta>
 
         <doc-meta>
             <doc-ids>
-                <doc-id type="pii">JOMI-8</doc-id>
+                <doc-id type="pii">JOMI-{{ production_id }}</doc-id>
             </doc-ids>
 
             <date-published>
-                <year>2014</year>
+                <year>{{ pubdate }}</year>
                 <month>07</month>
                 <day>31</day>
             </date-published>
 
             <authors>
                 <author>
-                    <last-name>Reinhorn</last-name>
+                    <last-name>{{ author }}</last-name>
                     <fore-name>Michael</fore-name>
                     <first-name>Michael</first-name>
                     <initials>M</initials>
-	<affiliation>Tufts University School of Medicine</affiliation>
+	<affiliation>{{ affiliation }}</affiliation>
                 </author>
             </authors>
 
-            <title>${x}</title>
+            <title>{{ title }}</title>
 
             <abstract>
                 <section>
@@ -64,7 +64,7 @@
 
         <extra>
             <ext-links>
-                <ext-link type="url" view-type="html">https://jomi.com/article/8/</ext-link>
+                <ext-link type="url" view-type="html">{{ link }}</ext-link>
             </ext-links>
         </extra>
     </doc>
