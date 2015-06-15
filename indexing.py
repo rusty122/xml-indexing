@@ -65,7 +65,7 @@ for elem in tree.iterfind('channel/item'):
 	# for tag in content.iterfind('h4'):
 	# 	print tag.text
 
-	renderAndSave( template.render( data ) )
+	renderAndSave( template.render( data ), data['production_id'] )
 
 
 # parse the necessary data into a dictionary
