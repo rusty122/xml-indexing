@@ -115,10 +115,37 @@ for elem in tree.iterfind('channel/item'):
 		content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '</body>' )	
 	except:
 		print  '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '</body>'
+		continue
 	
-	#for tag in content.iterfind('h4'):
-		#print tag.text
-
+	textContent = ""
+	discussion = False
+	abstract   = False
+	reading    = False
+	data['sections'] = []
+	data['abstract'] = ''
+	for tag in content:
+		if tag.tag == 'h4':
+			if reading:
+				if abstract:
+					data['abstract'] = textContent
+					abstract = False
+				else:
+					data['sections'].append({'title':sectionTitle, 'text': textContent})
+			if tag.text == "Abstract":
+				abstract = True
+				print "Abstract!!"
+			elif tag.text == "Discussion":
+				break
+			else:
+				sectionTitle = tag.text
+			textContent = ""
+		else:
+			if tag.text != None:
+				textContent += tag.text
+	
+	if(debug):
+		print data['abstract']
+	
 	renderAndSave( data )
 
 
