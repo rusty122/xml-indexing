@@ -2,6 +2,7 @@
 import sys
 import jinja2
 import codecs
+from datetime import datetime
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -19,53 +20,95 @@ def getMetaData(dict, article):
 		# If the text in the meta_key tag is "production_id" 
 		# save the meta_value tag text in our dictionary as "production_id"
 		if metaObject.find('wp:meta_key', namespace).text == "production_id":
-			dict['production_id'] = metaObject.find('wp:meta_value', namespace).text
+			data['production_id'] = metaObject.find('wp:meta_value', namespace).text
 		# Otherwise, if the text in the meta_key tag is "hospital_name"
 		# save the text of meta_value tag in our dictionary as "affiliation"
 		elif metaObject.find('wp:meta_key', namespace).text == "hospital_name":
 			dict['affiliation'] = metaObject.find('wp:meta_value', namespace).text
-	return dict
+
+
+def pubdate(data, elem):
+	try:
+		publicationDate = datetime.strptime(elem.find('pubDate').text[:-6], '%a, %d %b %Y %H:%M:%S')
+	except:
+		print 'Failed to parse publication date for ' + data['title']
+		publicationDate = datetime.now()
+   
+	data['pub_year']  = publicationDate.strftime('%Y')
+	data['pub_month'] = publicationDate.strftime('%m')
+	data['pub_day']   = publicationDate.strftime('%d')
+   
+# The last name occasionally has MDs and PHDs in it
+def parseLastName(name):
+	name = name.split(',')[0]
+	names = name.split(' ')
+	name = ''
+	for i in range(len(names)):
+		if names[i].upper() != 'MD' and names[i].upper() != 'PHD':
+			if i > 0:
+				name += ' '
+			name += names[i]
+		else:
+			break
+	return name
+
+
+def getAuthors(data, elem):   
+	# get the author's JoMI username (use findall() if multiple authors exist?)
+	author_usernames = elem.findall('category[@domain="author"]')
+	# loop through author listings at beginning of xml doc
+	data['authors'] = []
+	for usernameElem in author_usernames :
+		username = usernameElem.text
+		for i in tree.iterfind('channel/wp:author', namespace):
+			if i.find('wp:author_login', namespace).text == username:
+				first_name = i.find('wp:author_first_name', namespace).text
+				last_name  = parseLastName(i.find('wp:author_last_name', namespace).text)
+               
+				data['authors'].append({
+					'first_name': first_name,
+					'last_name' : last_name,
+					'initials'  : first_name[0] + last_name[0]
+				})
+				break
+
 
 # save xml file with specified title that contains `text`
-def renderAndSave(text, title):
+def renderAndSave( data ):
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
 	TEMPLATE_FILE = "/home/russell/Desktop/indexing/JOMI-8.xml"
 	template = templateEnv.get_template( TEMPLATE_FILE )
-	file = codecs.open('files/' + title + '.xml', 'w', encoding='utf8')
-	file.write( text )
+	file = codecs.open('files/' + data['production_id'] + '.xml', 'w', encoding='utf8')
+	file.write( template.render(data) )
 	file.close()
 
 
 
-# Use ET to define the xml file
+# Create ElementTree object from xml file
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
-# For each article in the xml file
+
+# For each article in the ElementTree object
 for elem in tree.iterfind('channel/item'):
-	if elem.find('wp:status', namespace).text == 'preprint':
+	# skip article if it is still in preprint
+	if elem.find('wp:status', namespace).text == 'preprint' or elem.find('wp:status', namespace).text == 'coming_soon':
 		continue
-	# Initialize an empty dictionary that will be appended
-	# to hold all of the data that we parse
+	# Initialize an empty dictionary that will hold all of the parsed data
 	data = {}
 	# Save the title, link, and pubdate of the article as dictionary entries
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
-	data['pubdate'] = elem.find('pubDate').text
-	data = getMetaData(data, elem)
-	
-	# get the author's JoMI username (use findall() if multiple authors exist?)
-	author_username = elem.find('category[@domain="author"]').text
-	# loop through author listings at beginning of xml doc
-	for i in tree.iterfind('channel/wp:author', namespace):
-		if i.find('wp:author_login', namespace).text == author_username:
-			 data['author'] = i.find('wp:author_display_name', namespace).text
+
+	getMetaData(data, elem)
+	pubdate(data, elem)
+	getAuthors(data, elem)
 
 	# content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + \
 	# 		elem.find('content:encoded', namespace).text.encode('utf-8') + '</body>' )	
 	# for tag in content.iterfind('h4'):
 	# 	print tag.text
 
-	renderAndSave( template.render( data ), data['production_id'] )
+	renderAndSave( data )
 
 
 # parse the necessary data into a dictionary

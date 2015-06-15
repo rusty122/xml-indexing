@@ -17,20 +17,22 @@
             </doc-ids>
 
             <date-published>
-                <year>{{ pubdate }}</year>
-                <month>07</month>
-                <day>31</day>
-            </date-published>
+               <year>{{ pub_year }}</year>
+               <month>{{ pub_month }}</month>
+               <day>{{ pub_day }}</day>
+           </date-published>
 
             <authors>
-                <author>
-                    <last-name>{{ author }}</last-name>
-                    <fore-name>Michael</fore-name>
-                    <first-name>Michael</first-name>
-                    <initials>M</initials>
-	<affiliation>{{ affiliation }}</affiliation>
-                </author>
-            </authors>
+               {% for author in authors %}
+               <author>
+                   <last-name>{{ author.last_name }}</last-name>
+                   <fore-name>{{ author.first_name }}</fore-name>
+                   <first-name>{{ author.first_name }}</first-name>
+                   <initials>{{ author.initials }}</initials>
+                   <affiliation>{{ affiliation }}</affiliation>
+               </author>
+               {% endfor %}
+           </authors>
 
             <title>{{ title }}</title>
 
