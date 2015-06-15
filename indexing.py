@@ -11,30 +11,48 @@ except ImportError:
 namespace = {'wp':'http://wordpress.org/export/1.2/',
 			 'content':'http://purl.org/rss/1.0/modules/content/'}
 
+
+# loop through every element in the article with the tag wp:postmeta
+# and save necessary data to the dictionary
+def getMetaData(dict, article):
+	for metaObject in article.findall('wp:postmeta', namespace):
+		# If the text in the meta_key tag is "production_id" 
+		# save the meta_value tag text in our dictionary as "production_id"
+		if metaObject.find('wp:meta_key', namespace).text == "production_id":
+			dict['production_id'] = metaObject.find('wp:meta_value', namespace).text
+		# Otherwise, if the text in the meta_key tag is "hospital_name"
+		# save the text of meta_value tag in our dictionary as "affiliation"
+		elif metaObject.find('wp:meta_key', namespace).text == "hospital_name":
+			dict['affiliation'] = metaObject.find('wp:meta_value', namespace).text
+	return dict
+
+# save xml file with specified title that contains `text`
+def renderAndSave(text, title):
+	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
+	templateEnv = jinja2.Environment( loader=templateLoader )
+	TEMPLATE_FILE = "/home/russell/Desktop/indexing/JOMI-8.xml"
+	template = templateEnv.get_template( TEMPLATE_FILE )
+	file = codecs.open('files/' + title + '.xml', 'w', encoding='utf8')
+	file.write( text )
+	file.close()
+
+
+
 # Use ET to define the xml file
 tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
-
 # For each article in the xml file
 for elem in tree.iterfind('channel/item'):
+	if elem.find('wp:status', namespace).text == 'preprint':
+		continue
 	# Initialize an empty dictionary that will be appended
 	# to hold all of the data that we parse
 	data = {}
-	# Save the title and link of the article as dictionary entries
+	# Save the title, link, and pubdate of the article as dictionary entries
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
-	# loop through every element in the article with the tag wp:postmeta
-	for i in elem.findall('wp:postmeta', namespace):
-		# If the text in the meta_key tag is "production_id" 
-		# save the meta_value tag text in our dictionary as "production_id"
-		if i.find('wp:meta_key', namespace).text == "production_id":
-			data['production_id'] = i.find('wp:meta_value', namespace).text
-		# Otherwise, if the text in the meta_key tag is "hospital_name"
-		# save the text of meta_value tag in our dictionary as "affiliation"
-		elif i.find('wp:meta_key', namespace).text == "hospital_name":
-			data['affiliation'] = i.find('wp:meta_value', namespace).text
-	# Save date of publishing as dictionary entry "pubdate"
-	# (will have to parse this into m-d-y values)
 	data['pubdate'] = elem.find('pubDate').text
+	data = getMetaData(data, elem)
+	
 	# get the author's JoMI username (use findall() if multiple authors exist?)
 	author_username = elem.find('category[@domain="author"]').text
 	# loop through author listings at beginning of xml doc
@@ -42,23 +60,12 @@ for elem in tree.iterfind('channel/item'):
 		if i.find('wp:author_login', namespace).text == author_username:
 			 data['author'] = i.find('wp:author_display_name', namespace).text
 
-	# print '<?xml version="1.0" encoding="UTF-8" ?>' + elem.find('content:encoded', namespace).text.encode('utf-8')
-	# content += "<?xml version="1.0" encoding="UTF-8" ?>"
-	# content2 = ET.fromstring( content )	
+	# content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + \
+	# 		elem.find('content:encoded', namespace).text.encode('utf-8') + '</body>' )	
 	# for tag in content.iterfind('h4'):
-	# 	print tag
+	# 	print tag.text
 
-
-#.encode('utf-8')
-
-	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
-	templateEnv = jinja2.Environment( loader=templateLoader )
-	TEMPLATE_FILE = "/home/russell/Desktop/indexing/JOMI-8.xml"
-	template = templateEnv.get_template( TEMPLATE_FILE )
-	# needs to have separate name for each article
-	file = codecs.open('files/article.xml', 'w', encoding='utf8')
-	file.write( template.render( data ) )
-	file.close()
+	renderAndSave( template.render( data ) )
 
 
 # parse the necessary data into a dictionary
