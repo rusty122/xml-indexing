@@ -91,7 +91,7 @@ tree = ET.ElementTree(file="/home/nolan/Documents/work/indexing/jomi.wordpress.2
 # For each article in the ElementTree object
 for elem in tree.iterfind('channel/item'):
 	# skip article if it is still in preprint
-	if elem.find('wp:status', namespace).text == 'preprint' or elem.find('wp:status', namespace).text == 'coming_soon':
+	if not elem.find('wp:status', namespace).text == 'publish':
 		continue
 	# Initialize an empty dictionary that will hold all of the parsed data
 	data = {}
@@ -129,23 +129,32 @@ for elem in tree.iterfind('channel/item'):
 				if abstract:
 					data['abstract'] = textContent
 					abstract = False
+					#print textContent
 				else:
 					data['sections'].append({'title':sectionTitle, 'text': textContent})
+					if discussion:
+						break
 			if tag.text == "Abstract":
 				abstract = True
-				print "Abstract!!"
+				#print "Abstract!!"
 			elif tag.text == "Discussion":
-				break
+				discussion = True
+				sectionTitle = tag.text
 			else:
 				sectionTitle = tag.text
 			textContent = ""
+			reading = True
 		else:
 			if tag.text != None:
-				textContent += tag.text
+				if tag.tag == 'h5':
+					textContent += tag.text.upper()+'. '
+				else:
+					textContent += tag.text
 	
-	if(debug):
-		print data['abstract']
-	
+	#if(debug):
+		#print data['abstract']
+	if len(data['sections']) == 1 :
+		print data['title']
 	renderAndSave( data )
 
 
