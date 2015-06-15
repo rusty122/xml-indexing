@@ -42,10 +42,14 @@ for elem in tree.iterfind('channel/item'):
 		if i.find('wp:author_login', namespace).text == author_username:
 			 data['author'] = i.find('wp:author_display_name', namespace).text
 
-	# content = elem.find('content:encoded', namespace).text
-	# for tag in content:
+	# print '<?xml version="1.0" encoding="UTF-8" ?>' + elem.find('content:encoded', namespace).text.encode('utf-8')
+	# content += "<?xml version="1.0" encoding="UTF-8" ?>"
+	# content2 = ET.fromstring( content )	
+	# for tag in content.iterfind('h4'):
 	# 	print tag
 
+
+#.encode('utf-8')
 
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
