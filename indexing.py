@@ -26,7 +26,6 @@ def getMetaData(dict, article):
 		elif metaObject.find('wp:meta_key', namespace).text == "hospital_name":
 			dict['affiliation'] = metaObject.find('wp:meta_value', namespace).text
 
-
 def pubdate(data, elem):
 	try:
 		publicationDate = datetime.strptime(elem.find('pubDate').text[:-6], '%a, %d %b %Y %H:%M:%S')
@@ -52,7 +51,6 @@ def parseLastName(name):
 			break
 	return name
 
-
 def getAuthors(data, elem):   
 	# get the author's JoMI username (use findall() if multiple authors exist?)
 	author_usernames = elem.findall('category[@domain="author"]')
@@ -72,7 +70,6 @@ def getAuthors(data, elem):
 				})
 				break
 
-
 # save xml file with specified title that contains `text`
 def renderAndSave( data ):
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
@@ -86,27 +83,31 @@ def renderAndSave( data ):
 
 
 # Create ElementTree object from xml file
-tree = ET.ElementTree(file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
+tree = ET.ElementTree(\
+	file="/home/russell/Desktop/indexing/jomi.wordpress.2015-06-11.xml")
 
 # For each article in the ElementTree object
 for elem in tree.iterfind('channel/item'):
 	# skip article if it is still in preprint
-	if elem.find('wp:status', namespace).text == 'preprint' or elem.find('wp:status', namespace).text == 'coming_soon':
+	if elem.find('wp:status', namespace).text == 'preprint'\
+	or elem.find('wp:status', namespace).text == 'coming_soon'\
+	or elem.find('wp:status', namespace).text == 'in_production':
 		continue
 	# Initialize an empty dictionary that will hold all of the parsed data
 	data = {}
-	# Save the title, link, and pubdate of the article as dictionary entries
+	# Add entries to dictionary from parsed xml
 	data['title'] = elem.find('title').text
 	data['link'] = elem.find('link').text
-
 	getMetaData(data, elem)
 	pubdate(data, elem)
 	getAuthors(data, elem)
 
-	# content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + \
-	# 		elem.find('content:encoded', namespace).text.encode('utf-8') + '</body>' )	
-	# for tag in content.iterfind('h4'):
-	# 	print tag.text
+
+	# content = ET.fromstring(elem.find('content:encoded', namespace).text.encode('utf-8') )
+	content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + \
+ 		elem.find('content:encoded', namespace).text.encode('utf-8') + '</body>' )	
+ 	for tag in content.iterfind('h4'):
+ 		print tag
 
 	renderAndSave( data )
 
