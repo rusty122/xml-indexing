@@ -11,7 +11,7 @@
 
 paths = { 
 			'Nolan'  : '/home/nolan/Documents/work/indexing/',
-			'Russel' : '/home/russel/Desktop/indexing/'
+			'Russell' : '/home/russell/Desktop/indexing/'
 		}
 
 currentUser = 'Nolan'
