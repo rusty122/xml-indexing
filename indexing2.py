@@ -161,8 +161,11 @@ def parseUnorderedList(ul, tabCount, ulType=0):
 def getOutline(elem):
 	for metaObject in elem.findall('wp:postmeta', namespace):
 		if metaObject.find('wp:meta_key', namespace).text == "outline":
-			return metaObject.find('wp:meta_value', namespace).text
-	return ""
+			content = metaObject.find('wp:meta_value', namespace).text.encode('utf-8').replace('<br>','<br/>')
+			try:
+				return ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '\n</body>' )
+			except:
+				return 'Parsing procedure_outline failed...'
 
 # save xml file with specified title that contains `text`
 def renderAndSave( data ):
