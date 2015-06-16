@@ -158,7 +158,11 @@ def parseUnorderedList(ul, tabCount, ulType=0):
 	textContent += '\n' + (' '*(tabCount+1)*4) 
 	return textContent
 
-
+def getOutline(elem):
+	for metaObject in elem.findall('wp:postmeta', namespace):
+		if metaObject.find('wp:meta_key', namespace).text == "outline":
+			return metaObject.find('wp:meta_value', namespace).text
+	return ""
 
 # save xml file with specified title that contains `text`
 def renderAndSave( data ):
