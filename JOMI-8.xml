@@ -22,20 +22,17 @@
                <day>{{ pub_day }}</day>
            </date-published>
 
-            <authors>
-               {% for author in authors %}
+            <authors>{% for author in authors %}
                <author>
                    <last-name>{{ author.last_name }}</last-name>
                    <fore-name>{{ author.first_name }}</fore-name>
                    <first-name>{{ author.first_name }}</first-name>
                    <initials>{{ author.initials }}</initials>
                    <affiliation>{{ affiliation }}</affiliation>
-               </author>
-               {% endfor %}
+               </author>{% endfor %}
            </authors>
 
             <title>{{ title }}</title>
-
             <abstract>
                 <section>
                     <text>{{ abstract }}</text>
@@ -44,13 +41,11 @@
         </doc-meta>
 
         <content>
-            <body>
-				{% for section in sections %}
+            <body>{% for section in sections %}
                 <section>
                     <title>{{ section.title }}</title>
                     <text>{{ section.text }}</text>
-                </section>
-				{% endfor %}
+                </section>{% endfor %}
              </body>
         </content>
 
