@@ -107,6 +107,40 @@ def addReasonableNewlines(s, tabCount):
 	newString += s[pos:] + '\n'
 	return newString
 
+def getOLBullet(olType, num):
+	olType = olType%2
+	b = ' '*4*olType
+	if(olType == 0):
+		b += str(num)
+	elif(olType == 1):
+		num = num % 52
+		if(num < 26):
+			b += chr(num + ord('a') - 1)  
+		else:
+			b += chr(num + ord('A') - 27)
+	return b + '. '
+
+def getULBullet(ulType):
+	ulBullets = ['*','~', '-', '+']
+	ulType = ulType%4
+	return ' '*4*olType + ulBullets[ulType] +' '
+
+def parseOrderedList(ol, tabCount, olType=0):
+	if(olType > 5):
+		print 'hah'
+		exit()
+	i = 1
+	textContent = ''
+	#print 'tag element:',ol, ol.attrib
+	for listElem in ol:
+		if(listElem.tag == 'li'):
+			textContent += '\n' + (' '*(tabCount+1)*4) + getOLBullet(olType, i) + ''.join(listElem.itertext()).strip()
+			i += 1
+		elif(listElem != tag and listElem.tag == 'ol'):
+			#print 'child element:',listElem, listElem.attrib
+			textContent += parseOrderedList(listElem, tabCount+1, olType+1)
+	textContent += '\n' + (' '*(tabCount+1)*4) 
+	return textContent
 
 
 # save xml file with specified title that contains `text`
@@ -136,7 +170,7 @@ for elem in tree.iterfind('channel/item'):
 	data['link'] = elem.find('link').text
 	
 	debug = False
-	if data['title'] == 'Cervical Laminaplasty':
+	if data['title'] == 'Microsurgical Technique for 1mm Vessel End to End Anastomosis':
 		debug = True
      
 	getMetaData(data, elem)
@@ -164,7 +198,6 @@ for elem in tree.iterfind('channel/item'):
 	for tag in content:
 		if tag.tag == 'h4':
 			if reading:
-				textContent = addReasonableNewlines(textContent, tabCount)
 				if abstract:
 					data['abstract'] = textContent
 					abstract = False
@@ -173,26 +206,24 @@ for elem in tree.iterfind('channel/item'):
 					data['sections'].append({'title':sectionTitle, 'text': textContent})
 					if discussion:
 						break
+			textContent = ""
 			if tag.text == "Abstract":
 				abstract = True
+				textContent = '\n'
 				#print "Abstract!!"
 			elif tag.text == "Discussion":
 				discussion = True
 				sectionTitle = tag.text
 			else:
 				sectionTitle = tag.text
-			textContent = ""
 			reading = True
-		elif tag.tag == 'ol':
-			i = 0
-			for listElem in tag.findall('*'):
-				textContent += '\n' + (' '*(tabCount+1)*4) + str(i) +'. ' + listElem.text
-				i += 1
+		elif tag.tag == 'ol' and debug:
+			textContent += parseOrderedList(tag, tabCount+1)
 		elif tag.text != None:
 			if tag.tag == 'h5':
-				textContent += '\n' + (' '*tabCount*4) + tag.text.strip().upper()+'.\n' + (' '*tabCount*4)
+				textContent += '\n' + (' '*tabCount*4) + tag.text.strip().upper()+'.\n'
 			else:
-				textContent += tag.text
+				textContent += (' '*tabCount*4) + addReasonableNewlines(tag.text, tabCount)
 	
 	#if(debug):
 		#print data['abstract']
