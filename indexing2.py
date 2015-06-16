@@ -1,4 +1,26 @@
 # -*- coding: utf-8 -*-
+
+################################################################################
+#																			   #
+# Designed for computers running Ubuntu, I guess, but probably pretty portable #
+#																			   #
+################################################################################
+
+
+#add the path on your computer to the indexing folder ad set currentUser to you
+
+paths = { 
+			'Nolan'  : '/home/nolan/Documents/work/indexing/',
+			'Russel' : '/home/russel/Desktop/indexing/'
+		}
+
+currentUser = 'Nolan'
+
+wordpressExportPath = paths[currentUser] + 'jomi.wordpress.2015-06-11.xml'
+jinjaTemplatePath   = paths[currentUser] + 'JOMI-8.xml'
+
+
+
 import sys
 import jinja2
 import codecs
@@ -72,12 +94,26 @@ def getAuthors(data, elem):
 				})
 				break
 
+def addReasonableNewlines(s, tabCount):
+	length = len(s)
+	newString = ''
+	pos = 0
+	while(length > pos + 80):
+		newLength = 70
+		while(length > pos + newLength and s[pos + newLength]!=' '):
+			newLength += 1
+		newString += s[pos:pos+newLength] + '\n' + (' '*tabCount*4)
+		pos += newLength +1
+	newString += s[pos:] + '\n'
+	return newString
+
+
 
 # save xml file with specified title that contains `text`
 def renderAndSave( data ):
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
-	TEMPLATE_FILE = "/home/nolan/Documents/work/indexing/JOMI-8.xml"
+	TEMPLATE_FILE = jinjaTemplatePath
 	template = templateEnv.get_template( TEMPLATE_FILE )
 	file = codecs.open('files/' + data['production_id'] + '.xml', 'w', encoding='utf8')
 	file.write( template.render(data) )
@@ -86,7 +122,7 @@ def renderAndSave( data ):
 
 
 # Create ElementTree object from xml file
-tree = ET.ElementTree(file="/home/nolan/Documents/work/indexing/jomi.wordpress.2015-06-11.xml")
+tree = ET.ElementTree(file=wordpressExportPath)
 
 # For each article in the ElementTree object
 for elem in tree.iterfind('channel/item'):
@@ -123,9 +159,12 @@ for elem in tree.iterfind('channel/item'):
 	reading    = False
 	data['sections'] = []
 	data['abstract'] = ''
+	
+	tabCount = 5
 	for tag in content:
 		if tag.tag == 'h4':
 			if reading:
+				textContent = addReasonableNewlines(textContent, tabCount)
 				if abstract:
 					data['abstract'] = textContent
 					abstract = False
@@ -144,12 +183,16 @@ for elem in tree.iterfind('channel/item'):
 				sectionTitle = tag.text
 			textContent = ""
 			reading = True
-		else:
-			if tag.text != None:
-				if tag.tag == 'h5':
-					textContent += tag.text.upper()+'. '
-				else:
-					textContent += tag.text
+		elif tag.tag == 'ol':
+			i = 0
+			for listElem in tag.findall('*'):
+				textContent += '\n' + (' '*(tabCount+1)*4) + str(i) +'. ' + listElem.text
+				i += 1
+		elif tag.text != None:
+			if tag.tag == 'h5':
+				textContent += '\n' + (' '*tabCount*4) + tag.text.strip().upper()+'.\n' + (' '*tabCount*4)
+			else:
+				textContent += tag.text
 	
 	#if(debug):
 		#print data['abstract']
@@ -177,7 +220,7 @@ for elem in tree.iterfind('channel/item'):
 # The text for both the Main Text and the Procedure Outline would be appropriate.
 # Do not include the citations, comments, disclosures, or statement of consent.
 # Each document will need a unique identifier.  In the example, I used
-	# “JOMI-“ along with your identifier.  Adding “JOMI-“ before your
-	#  article ID will ensure there is no conflict with any other content we index.
+# “JOMI-“ along with your identifier.  Adding “JOMI-“ before your
+#  article ID will ensure there is no conflict with any other content we index.
 # The section headings are not required, but many times they are themselves informative.
 # You should provide a URL for linking.
