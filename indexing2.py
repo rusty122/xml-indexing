@@ -34,6 +34,7 @@ except ImportError:
 namespace = {'wp':'http://wordpress.org/export/1.2/',
 			 'content':'http://purl.org/rss/1.0/modules/content/'}
 
+debug = False
 
 # loop through every element in the article with the tag wp:postmeta
 # and save necessary data to the dictionary
@@ -123,12 +124,9 @@ def getOLBullet(olType, num):
 def getULBullet(ulType):
 	ulBullets = ['*','~', '-', '+']
 	ulType = ulType%4
-	return ' '*4*olType + ulBullets[ulType] +' '
+	return ' '*4*ulType + ulBullets[ulType] +' '
 
 def parseOrderedList(ol, tabCount, olType=0):
-	if(olType > 5):
-		print 'hah'
-		exit()
 	i = 1
 	textContent = ''
 	#print 'tag element:',ol, ol.attrib
@@ -136,11 +134,29 @@ def parseOrderedList(ol, tabCount, olType=0):
 		if(listElem.tag == 'li'):
 			textContent += '\n' + (' '*(tabCount+1)*4) + getOLBullet(olType, i) + ''.join(listElem.itertext()).strip()
 			i += 1
-		elif(listElem != tag and listElem.tag == 'ol'):
+		elif(listElem.tag == 'ol'):
 			#print 'child element:',listElem, listElem.attrib
 			textContent += parseOrderedList(listElem, tabCount+1, olType+1)
+		elif(listElem.tag == 'ul'):
+			textContent += parseUnorderedList(listElem, tabCount+1, 0)
+			
 	textContent += '\n' + (' '*(tabCount+1)*4) 
 	return textContent
+
+def parseUnorderedList(ul, tabCount, ulType=0):
+	textContent = ''
+	for listElem in ul:
+		if(listElem.tag == 'li'):
+			textContent += '\n' + (' '*(tabCount+1)*4) + getULBullet(ulType) + ''.join(listElem.itertext()).strip()
+		elif(listElem.tag == 'ol'):
+			#print 'child element:',listElem, listElem.attrib
+			textContent += parseUnorderedList(listElem, tabCount+1, 0)
+		elif(listElem.tag == 'ul'):
+			textContent += parseUnorderedList(listElem, tabCount+1, ulType+1)
+			
+	textContent += '\n' + (' '*(tabCount+1)*4) 
+	return textContent
+
 
 
 # save xml file with specified title that contains `text`
@@ -170,7 +186,7 @@ for elem in tree.iterfind('channel/item'):
 	data['link'] = elem.find('link').text
 	
 	debug = False
-	if data['title'] == 'Microsurgical Technique for 1mm Vessel End to End Anastomosis':
+	if data['title'] == 'Arthroscopic Bankart Repair for Anterior Shoulder Instability Using a Posterolateral Portal':
 		debug = True
      
 	getMetaData(data, elem)
@@ -196,11 +212,16 @@ for elem in tree.iterfind('channel/item'):
 	
 	tabCount = 5
 	for tag in content:
+		if abstract and debug:
+			print tag, tag.attrib
 		if tag.tag == 'h4':
 			if reading:
 				if abstract:
 					data['abstract'] = textContent
 					abstract = False
+					if debug:
+						print textContent
+						print 'hmmm...', tag.text
 					#print textContent
 				else:
 					data['sections'].append({'title':sectionTitle, 'text': textContent})
@@ -210,6 +231,8 @@ for elem in tree.iterfind('channel/item'):
 			if tag.text == "Abstract":
 				abstract = True
 				textContent = '\n'
+				if(debug):
+					print 'abstract, yeah?'
 				#print "Abstract!!"
 			elif tag.text == "Discussion":
 				discussion = True
@@ -217,13 +240,19 @@ for elem in tree.iterfind('channel/item'):
 			else:
 				sectionTitle = tag.text
 			reading = True
-		elif tag.tag == 'ol' and debug:
+		elif tag.tag == 'ol':
 			textContent += parseOrderedList(tag, tabCount+1)
-		elif tag.text != None:
-			if tag.tag == 'h5':
-				textContent += '\n' + (' '*tabCount*4) + tag.text.strip().upper()+'.\n'
-			else:
-				textContent += (' '*tabCount*4) + addReasonableNewlines(tag.text, tabCount)
+		elif tag.tag == 'ul':
+			textContent += parseUnorderedList(tag, tabCount+1)
+		else:
+			newText = ''.join(tag.itertext())
+			if abstract and debug:
+				print tag, tag.attrib
+			if len(newText) > 0:
+				if tag.tag == 'h5':
+					textContent += '\n' + (' '*tabCount*4) + newText.upper()+'.\n'
+				else:
+					textContent += (' '*tabCount*4) + addReasonableNewlines(newText, tabCount)
 	
 	#if(debug):
 		#print data['abstract']
@@ -254,4 +283,4 @@ for elem in tree.iterfind('channel/item'):
 # “JOMI-“ along with your identifier.  Adding “JOMI-“ before your
 #  article ID will ensure there is no conflict with any other content we index.
 # The section headings are not required, but many times they are themselves informative.
-# You should provide a URL for linking.
+# You should provide a URL for linking.debug = False
