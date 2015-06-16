@@ -127,8 +127,8 @@ def getULBullet(ulType):
 	ulType = ulType%4
 	return ' '*4*ulType + ulBullets[ulType] +' '
 
-def parseOrderedList(ol, tabCount, olType=0):
-	i = 1
+def parseOrderedList(ol, tabCount, olType = 0, numberingOffset = 0):
+	i = numberingOffset + 1
 	textContent = ''
 	#print 'tag element:',ol, ol.attrib
 	for listElem in ol:
@@ -136,13 +136,14 @@ def parseOrderedList(ol, tabCount, olType=0):
 			textContent += '\n' + (' '*(tabCount+1)*4) + getOLBullet(olType, i) + ''.join(listElem.itertext()).strip()
 			i += 1
 		elif(listElem.tag == 'ol'):
+
 			#print 'child element:',listElem, listElem.attrib
-			textContent += parseOrderedList(listElem, tabCount+1, olType+1)
+			textContent += parseOrderedList(listElem, tabCount+1, olType+1)[0]
 		elif(listElem.tag == 'ul'):
 			textContent += parseUnorderedList(listElem, tabCount+1, 0)
 			
 	textContent += '\n' + (' '*(tabCount+1)*4) 
-	return textContent
+	return (textContent, i)
 
 def parseUnorderedList(ul, tabCount, ulType=0):
 	textContent = ''
@@ -165,7 +166,8 @@ def getOutline(elem):
 			try:
 				return ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '\n</body>' )
 			except:
-				return 'Parsing procedure_outline failed...'
+				return False
+	return False
 
 # save xml file with specified title that contains `text`
 def renderAndSave( data ):
@@ -242,16 +244,12 @@ for elem in tree.iterfind('channel/item'):
 			reading = True
 			if len(tag.tail) > 0 :
 				textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
-				if debug:
-					print tag.tail
 		elif tag.tag == 'ol':
-			textContent += parseOrderedList(tag, tabCount+1)
+			textContent += parseOrderedList(tag, tabCount+1)[0]
 		elif tag.tag == 'ul':
 			textContent += parseUnorderedList(tag, tabCount+1)
 		else:
 			newText = ''.join(tag.itertext())
-			if abstract and debug:
-				print tag, tag.attrib
 			if len(newText) > 0:
 				if tag.tag == 'h5':
 					textContent += '\n' + (' '*tabCount*4) + newText.upper()+'.\n'
@@ -263,10 +261,35 @@ for elem in tree.iterfind('channel/item'):
 				else:
 					textContent += (' '*tabCount*4) + addReasonableNewlines(newText, tabCount)
 	
+	procedure = getOutline(elem)
+	
+	if(procedure):
+		sectionTitle = 'Procedure'
+		textContent = '\n'
+		listCount = 0
+		for tag in procedure:
+			if tag.tag == 'h4':
+				textContent += '\n' + (' '*tabCount*4) + tag.text.strip().upper() + '\n'
+				if len(tag.tail) > 0 :
+					textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
+			elif tag.tag == 'ol':
+				newTextContent, listCount = parseOrderedList(tag, tabCount+1, 0, listCount)
+				textContent += newTextContent
+			elif tag.tag == 'ul':
+				textContent += parseUnorderedList(tag, tabCount+1)
+			else:
+				newText = ''.join(tag.itertext())
+				if len(newText) > 0:
+					if tag.tag == 'sup':
+						if len(tag.tail) > 0 :
+							textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
+					else:
+						textContent += (' '*tabCount*4) + addReasonableNewlines(newText, tabCount)
+	data['sections'].append({'title':sectionTitle, 'text': textContent})
+	
+						 
 	#if(debug):
 		#print data['abstract']
-	if len(data['sections']) == 1 :
-		print data['title']
 	renderAndSave( data )
 
 
