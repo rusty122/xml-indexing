@@ -96,6 +96,7 @@ def getAuthors(data, elem):
 				break
 
 def addReasonableNewlines(s, tabCount):
+	s = s.strip()
 	length = len(s)
 	newString = ''
 	pos = 0
@@ -212,16 +213,11 @@ for elem in tree.iterfind('channel/item'):
 	
 	tabCount = 5
 	for tag in content:
-		if abstract and debug:
-			print tag, tag.attrib
 		if tag.tag == 'h4':
 			if reading:
 				if abstract:
 					data['abstract'] = textContent
 					abstract = False
-					if debug:
-						print textContent
-						print 'hmmm...', tag.text
 					#print textContent
 				else:
 					data['sections'].append({'title':sectionTitle, 'text': textContent})
@@ -231,15 +227,16 @@ for elem in tree.iterfind('channel/item'):
 			if tag.text == "Abstract":
 				abstract = True
 				textContent = '\n'
-				if(debug):
-					print 'abstract, yeah?'
-				#print "Abstract!!"
 			elif tag.text == "Discussion":
 				discussion = True
 				sectionTitle = tag.text
 			else:
 				sectionTitle = tag.text
 			reading = True
+			if len(tag.tail) > 0 :
+				textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
+				if debug:
+					print tag.tail
 		elif tag.tag == 'ol':
 			textContent += parseOrderedList(tag, tabCount+1)
 		elif tag.tag == 'ul':
@@ -251,6 +248,11 @@ for elem in tree.iterfind('channel/item'):
 			if len(newText) > 0:
 				if tag.tag == 'h5':
 					textContent += '\n' + (' '*tabCount*4) + newText.upper()+'.\n'
+					if len(tag.tail) > 0 :
+						textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
+				elif tag.tag == 'sup':
+					if len(tag.tail) > 0 :
+						textContent += (' '*tabCount*4) + addReasonableNewlines(tag.tail, tabCount)
 				else:
 					textContent += (' '*tabCount*4) + addReasonableNewlines(newText, tabCount)
 	
