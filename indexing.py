@@ -78,6 +78,7 @@ def parseLastName(name):
 			break
 	return name
 
+
 # getAuthors(): Parse the firstname, lastname, and initials of the authors of
 #				the article and save this to the dictionary as a single tuple
 def getAuthors(data, elem):   
@@ -211,9 +212,10 @@ for elem in tree.iterfind('channel/item'):
 	pubdate(data, elem)
 	getAuthors(data, elem)
 
-	# Skip article if the text portion is empty
+	# Skip article if the main text portion is empty
 	if( elem.find('content:encoded', namespace).text == None):
 		continue
+	# Otherwise, create an elementTree from the main text
 	content = elem.find('content:encoded', namespace).text.encode('utf-8').replace('<br>','<br/>')
 	try:
 		content = ET.fromstring( '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '</body>' )	
@@ -221,6 +223,7 @@ for elem in tree.iterfind('channel/item'):
 		print  '<?xml version="1.0" encoding="UTF-8" ?>\n' + '<body>\n' + content + '</body>'
 		continue
 	
+	# Start parsing and formatting the main text of the article
 	textContent = ""
 	discussion = False
 	abstract   = False
@@ -269,6 +272,7 @@ for elem in tree.iterfind('channel/item'):
 				else:
 					textContent += (' '*tabCount*4) + addReasonableNewlines(newText, tabCount)
 	
+	# Parse and format the procedure outline of the article
 	procedure = getOutline(elem)
 	
 	if(procedure):
