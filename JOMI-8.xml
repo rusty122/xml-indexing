@@ -28,7 +28,7 @@
                    <fore-name>{{ author.first_name }}</fore-name>
                    <first-name>{{ author.first_name }}</first-name>
                    <initials>{{ author.initials }}</initials>
-                   <affiliation>{{ affiliation }}</affiliation>
+                   <suffix>PhD</suffix>
                </author>{% endfor %}
            </authors>
 

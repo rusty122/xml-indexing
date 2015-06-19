@@ -7,7 +7,7 @@
 ################################################################################
 
 
-# Add your local path to the indexing folder (git folder) and update currentUser
+# Add your local path to the indexing folder (git foldser) and update currentUser
 # In addition, create a folder called `files` in this folder (which is left 
 # untracked in the .gitignore file) where outputted xml files will be saved
 paths = { 
@@ -66,17 +66,21 @@ def pubdate(data, elem):
 # parseLastName(): If the author's name is saved with `MD` or `PHD` in WP, drop
 #					this to store in the dictionary
 def parseLastName(name):
-	name = name.split(',')[0]
-	names = name.split(' ')
+	commas = name.split(',')[0]
+	names = commas.split(' ')
 	name = ''
+	suffix = ''
 	for i in range(len(names)):
 		if names[i].upper() != 'MD' and names[i].upper() != 'PHD':
 			if i > 0:
 				name += ' '
 			name += names[i]
 		else:
+			suffix += ' '.join(names[i:])
 			break
-	return name
+	if len(commas) > 1:
+		suffix += ' ' + ','.join(commas[1:])
+	return name, suffix.strip()
 
 
 # getAuthors(): Parse the firstname, lastname, and initials of the authors of
@@ -91,12 +95,13 @@ def getAuthors(data, elem):
 		for i in tree.iterfind('channel/wp:author', namespace):
 			if i.find('wp:author_login', namespace).text == username:
 				first_name = i.find('wp:author_first_name', namespace).text
-				last_name  = parseLastName(i.find('wp:author_last_name', namespace).text)
+				last_name, suffix  = parseLastName(i.find('wp:author_last_name', namespace).text)
                
 				data['authors'].append({
 					'first_name': first_name,
 					'last_name' : last_name,
-					'initials'  : first_name[0] + last_name[0]
+					'initials'  : first_name[0] + last_name[0],
+					'suffix'    : suffix
 				})
 				break
 
