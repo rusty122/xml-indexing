@@ -143,7 +143,7 @@ def parseOrderedList(ol, tabCount, olType = 0, numberingOffset = 0):
 			textContent += parseUnorderedList(listElem, tabCount+1, 0)
 			
 	textContent += '\n' + (' '*(tabCount+1)*4) 
-	return (textContent, i)
+	return (textContent, i-1)
 
 def parseUnorderedList(ul, tabCount, ulType=0):
 	textContent = ''
