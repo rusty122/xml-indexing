@@ -44,7 +44,7 @@
             <body>{% for section in sections %}
                 <section>
                     <title>{{ section.title }}</title>
-                    <text>{{ section.text }}</text>
+                    <text>{{ section.text }}
                 </section>{% endfor %}
              </body>
         </content>
